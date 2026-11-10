@@ -132,7 +132,7 @@ results/per_cq.csv                    metrics per CQ, with the gold classes miss
 | R-Prec | precision at k = the CQ's own number of gold classes |
 | MRR | 1 / rank of the first gold class |
 
-Each is averaged over the 13 CQs. The `random` row is the expected score of a random ranking, computed exactly rather than sampled.
+Each is averaged over the CQs. The `random` row is the expected score of a random ranking, computed exactly rather than sampled.
 
 ## Layout
 
