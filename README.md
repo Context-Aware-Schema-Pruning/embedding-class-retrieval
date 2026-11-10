@@ -123,17 +123,6 @@ results/summary.csv                   mean metrics per run and view
 results/per_cq.csv                    metrics per CQ, with the gold classes missed in the top 10
 ```
 
-## Metrics
-
-| metric | meaning |
-|---|---|
-| R@5, R@10, R@20 | share of a CQ's gold classes found in the top k |
-| P@5, P@10 | share of the top k that are gold |
-| R-Prec | precision at k = the CQ's own number of gold classes |
-| MRR | 1 / rank of the first gold class |
-
-Each is averaged over the CQs. The `random` row is the expected score of a random ranking, computed exactly rather than sampled.
-
 ## Layout
 
 ```
