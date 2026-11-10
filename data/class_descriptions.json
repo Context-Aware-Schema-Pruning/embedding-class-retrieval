@@ -1,0 +1,637 @@
+[
+    {
+        "name": "AgeCategory",
+        "label": "Age Category",
+        "description": "The age group values, such as child or adult. A controlled-vocabulary class of categorical age values used by AgeRecord via hasValue; unlike AgeRecord, it represents an age-category value rather than a provenance-bearing record about a person.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "AgeRecord"
+        ]
+    },
+    {
+        "name": "AgeRecord",
+        "label": "Age Record",
+        "description": "A record of a person's age at a given time, as a number of years or as an age group such as child or adult; used for children, median ages, and average ages. A subclass of AgentRecord for person-only age assertions, recording a person's numeric age and/or an AgeCategory at a particular temporal extent, with provenance attached to the record rather than directly to the person.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "AgeCategory",
+            "Person",
+            "Agent",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "Agent",
+        "label": "Agent",
+        "description": "A person or organization, such as an enslaved individual, an owner or enslaver, or an institution. A top-level class for entities that can bear agent records in the ontology; its subclasses are Person and Organization.",
+        "parent": [],
+        "children": [
+            "Organization",
+            "Person"
+        ],
+        "neighbours": [
+            "AgentRecord",
+            "Description",
+            "EntityWithProvenance",
+            "ExternalReference",
+            "InterAgentRelationshipRecord",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "AgentRecord",
+        "label": "Agent Record",
+        "description": "A documented record about a person or organization, taken from a historical source. A subclass of EntityWithProvenance for a single provenance-bearing assertion about exactly one Agent, temporally scoped by exactly one TemporalExtent; its direct subclasses include PersonRecord, OriginRecord, RaceRecord, AgeRecord, SexRecord, OccupationRecord, PersonStatusRecord, NameRecord, InterAgentRelationshipRecord, and ParticipantRoleRecord.",
+        "parent": [
+            "EntityWithProvenance"
+        ],
+        "children": [
+            "AgeRecord",
+            "InterAgentRelationshipRecord",
+            "NameRecord",
+            "OccupationRecord",
+            "OriginRecord",
+            "ParticipantRoleRecord",
+            "PersonRecord",
+            "PersonStatusRecord",
+            "RaceRecord",
+            "SexRecord"
+        ],
+        "neighbours": [
+            "Agent",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent",
+            "DocumentTypes",
+            "LicenseInformation",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "Coordinates",
+        "label": "Coordinates",
+        "description": "The latitude and longitude of a location: its exact geographical position. A subclass of SpatialExtent representing one exact latitude/longitude pair for a place, with exactly one latitude and exactly one longitude.",
+        "parent": [
+            "SpatialExtent",
+            "Place"
+        ],
+        "children": [],
+        "neighbours": [
+            "Description",
+            "Event",
+            "OriginRecord",
+            "PlaceCV",
+            "PlaceTypeCV",
+            "SpatialExtent",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "Description",
+        "label": "Description",
+        "description": "A free-text description of a person, event, or place. A subclass of EntityWithProvenance representing exactly one textual description attached to an entity such as an Agent, Event, or Place.",
+        "parent": [
+            "EntityWithProvenance"
+        ],
+        "children": [],
+        "neighbours": [
+            "Agent",
+            "Event",
+            "Place",
+            "PlaceCV",
+            "AgentRecord",
+            "DocumentTypes",
+            "LicenseInformation",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "DocumentTypes",
+        "label": "Document Types",
+        "description": "The kinds of historical source documents that records were taken from. A controlled-vocabulary class of original-source document types used by EntityWithProvenance through hasOriginalSourceType, distinct from the provenance-bearing entities that cite those source types.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "EntityWithProvenance"
+        ]
+    },
+    {
+        "name": "ECVO",
+        "label": "Enslaved Controlled Vocabulary for Origins",
+        "description": "The ethnicity values: the named ethnic groups or ethnic groupings a person belonged to. A controlled-vocabulary class of ethnonym values used by OriginRecord through hasECVO, recording the ethnic or ethnolinguistic group a person is said to come from.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "OriginRecord"
+        ]
+    },
+    {
+        "name": "EntityWithProvenance",
+        "label": "Entity With Provenance",
+        "description": "Anything documented together with its source: the historical document or archive it came from. A superclass for entities that carry source, licensing, attribution, and provenance-chain information; direct subclasses include AgentRecord, Description, Match, and Place.",
+        "parent": [],
+        "children": [
+            "AgentRecord",
+            "Description",
+            "Match",
+            "Place"
+        ],
+        "neighbours": [
+            "Agent",
+            "AgentRecord",
+            "DocumentTypes",
+            "Event",
+            "LicenseInformation",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "Event",
+        "label": "Event",
+        "description": "Something that happened at a place and time, such as a birth, death, sale, marriage, escape, manumission, voyage, disembarkation from a ship, rebellion, or census. A class for named, typed historical or research occurrences that are located at one or more places, have exactly one TemporalExtent, and provide participant roles; ResearchProject is a subclass of Event.",
+        "parent": [],
+        "children": [
+            "ResearchProject"
+        ],
+        "neighbours": [
+            "AgentRecord",
+            "Description",
+            "EntityWithProvenance",
+            "EventTypes",
+            "ExternalReference",
+            "ParticipantRoleRecord",
+            "PersonStatusRecord",
+            "Place",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "EventTypes",
+        "label": "Event Types",
+        "description": "The kinds of events, such as birth, death, sale, marriage, escape, manumission, voyage, rebellion, or census. A controlled-vocabulary class of event-type values used to type Event instances, rather than a class of events themselves.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "Event"
+        ]
+    },
+    {
+        "name": "ExternalReference",
+        "label": "External Reference",
+        "description": "A reference node that links one ontology entity to an external referent and/or external identifier; it is the object of hasExternalReference, not the external system or target itself.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "Agent",
+            "Event",
+            "ExternalReferent"
+        ]
+    },
+    {
+        "name": "ExternalReferent",
+        "label": "External Referent",
+        "description": "A class representing the external system, source, or referential target named by an ExternalReference, distinct from the ExternalReference node that carries the link metadata.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "ExternalReference"
+        ]
+    },
+    {
+        "name": "InterAgentRelationshipRecord",
+        "label": "Inter Agent Relationship Record",
+        "description": "A record of a relationship between two people, such as an owner and the person they enslaved, parent and child, spouses in a marriage, or other relatives. A subclass of AgentRecord representing one typed directed relationship from exactly one Agent to exactly one Agent, such as kinship or ownership, with temporal and provenance context attached to the relationship record.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "Agent",
+            "InterAgentRelationshipTypes",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "InterAgentRelationshipTypes",
+        "label": "Inter Agent Relationship Types",
+        "description": "The relationship values between people, such as owner or enslaver, parent, child, sibling, spouse, or other relative. A controlled-vocabulary class of directed relationship-type values used by InterAgentRelationshipRecord, such as Parent, Child, Sibling, Spouse, or Owner.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "InterAgentRelationshipRecord"
+        ]
+    },
+    {
+        "name": "LicenseInformation",
+        "label": "License Information",
+        "description": "A controlled-vocabulary class of licensing values attached to EntityWithProvenance, specifying reuse conditions rather than historical content.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "EntityWithProvenance"
+        ]
+    },
+    {
+        "name": "Match",
+        "label": "Match",
+        "description": "A subclass of EntityWithProvenance representing a provenance-bearing reconciliation assertion connecting two or more things and classifying that linkage with exactly one MatchType.",
+        "parent": [
+            "EntityWithProvenance"
+        ],
+        "children": [],
+        "neighbours": [
+            "MatchType",
+            "Agent",
+            "AgentRecord",
+            "DocumentTypes",
+            "Event",
+            "LicenseInformation",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "MatchType",
+        "label": "Match Type",
+        "description": "A controlled classification for Match assertions, distinguishing the status of a reconciliation such as Match, Related Match, or No Match.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "Match"
+        ]
+    },
+    {
+        "name": "NameRecord",
+        "label": "Name Record",
+        "description": "A record of a person's name: full name, first name, and surname, including common names and name variants. A subclass of AgentRecord that records the name of exactly one Agent, carrying exactly one full-name string and optionally a first-name string and/or surname string, together with one or more NameVariant nodes of which at most one is the preferred name variant.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "NameVariant",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "NameVariant",
+        "label": "Name Variant",
+        "description": "Another spelling or form of a person's name. A variant form of a recorded name, attached to a NameRecord through hasNameVariant, or through hasPreferredNameVariant for the preferred form.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "NameRecord"
+        ]
+    },
+    {
+        "name": "OccupationRecord",
+        "label": "Occupation Record",
+        "description": "A record of a person's occupation, skill, or labor: the work or trade they did. A subclass of AgentRecord for person-only occupation or skill assertions, recording exactly one occupation type and optionally a descriptive occupation string for the same person-specific claim.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "Occupations",
+            "Person",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "Occupations",
+        "label": "Occupations",
+        "description": "The occupation and skill category values: the kinds of labor and trades a person had. A controlled-vocabulary class of occupation-type values used by OccupationRecord, distinct from the provenance-bearing record that asserts a person's occupation.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "OccupationRecord"
+        ]
+    },
+    {
+        "name": "Organization",
+        "label": "Organization",
+        "description": "A subclass of Agent for non-person collective actors that can bear general agent records but not the person-only record types reserved for Person.",
+        "parent": [
+            "Agent"
+        ],
+        "children": [],
+        "neighbours": [ 
+            "AgentRecord",
+            "Description",
+            "EntityWithProvenance",
+            "ExternalReference",
+            "InterAgentRelationshipRecord",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "OriginRecord",
+        "label": "Origin Record",
+        "description": "A record of a person's ethnicity, ethnic group, or place of origin, where an enslaved person came from. A subclass of AgentRecord for person-only origin assertions, recording ethnolinguistic origin and/or place of origin through ECVO values and/or Place links, optionally with a descriptive ethnonym.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "ECVO",
+            "Person",
+            "Place",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "PSCategories",
+        "label": "PS Categories",
+        "description": "The status values of a person: enslaved, formerly enslaved, freed, or slave owner. A controlled-vocabulary class of person-status values used by PersonStatusRecord, such as freedom-status categories, rather than records about individual persons.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "PersonStatusRecord"
+        ]
+    },
+    {
+        "name": "ParticipantRoleRecord",
+        "label": "Participant Role Record",
+        "description": "A record of the role a person played in an event, that is, how they participated, for example being transported, sold, or taking part. A subclass of AgentRecord representing the role in which exactly one agent participates in exactly one Event, using a participant-role type rather than a general inter-agent relationship.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "Event",
+            "ParticipantRoleTypes",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "ParticipantRoleTypes",
+        "label": "Participant Role Types",
+        "description": "The values for a person's role in an event, such as captive, buyer, seller, or witness. A controlled-vocabulary class of event-participation role values used by ParticipantRoleRecord to specify how an agent participated in an Event.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "ParticipantRoleRecord"
+        ]
+    },
+    {
+        "name": "Person",
+        "label": "Person",
+        "description": "An individual person, such as an enslaved person, a freed person, a slave owner, or a relative of an enslaved person. A subclass of Agent for human individuals; only Person instances may bear the person-only record types such as OriginRecord, RaceRecord, AgeRecord, SexRecord, OccupationRecord, and PersonStatusRecord.",
+        "parent": [
+            "Agent"
+        ],
+        "children": [],
+        "neighbours": [
+            "AgentRecord",
+            "Description",
+            "EntityWithProvenance",
+            "ExternalReference",
+            "InterAgentRelationshipRecord",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "PersonRecord",
+        "label": "Person Record",
+        "description": "A documented fact about one person, such as their age, gender, ethnicity, skills, or enslaved status. A subclass of AgentRecord for records that pertain only to a Person rather than to Agents in general; each PersonRecord is the record of exactly one Person.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "Person",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "PersonStatusRecord",
+        "label": "Person Status Record",
+        "description": "A record of whether a person was enslaved, formerly enslaved, freed, or a slave owner, including the event that changed their status, such as manumission. A subclass of AgentRecord for person-only status assertions, recording exactly one person-status category and optionally linking that status assertion to a status-generating Event.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "Event",
+            "PSCategories",
+            "EntityWithProvenance",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "Place",
+        "label": "Place",
+        "description": "A location or geographical place, such as a country, county, city, port, plantation, address, or property where people lived or events happened. A named place class and subclass of EntityWithProvenance for specific places that may carry coordinates, temporal extent, descriptions, and place-type information, and may stand in broader, spatial-location, or administrative-part relations to PlaceCV entries.",
+        "parent": [
+            "EntityWithProvenance"
+        ],
+        "children": [],
+        "neighbours": [
+            "Description",
+            "Event",
+            "OriginRecord",
+            "PlaceCV",
+            "PlaceTypeCV",
+            "SpatialExtent",
+            "TemporalExtent",
+            "Agent",
+            "AgentRecord",
+            "DocumentTypes",
+            "LicenseInformation",
+            "ProvenanceActivity"
+        ]
+    },
+    {
+        "name": "PlaceCV",
+        "label": "Place CV",
+        "description": "A standard named location, such as a country or county, used to group places. A controlled-vocabulary style place class for standardized place entries used in broader, spatial-location, administrative, and place-typing relations; unlike Place, the documentation treats it as a controlled-vocabulary placeholder rather than a provenance-bearing place record.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "Description",
+            "Place",
+            "PlaceTypeCV"
+        ]
+    },
+    {
+        "name": "PlaceTypeCV",
+        "label": "Place Type CV",
+        "description": "The kinds of places, such as country, county, city, port, plantation, or property. A controlled-vocabulary class of place-type values used by Place and PlaceCV, such as categories of place rather than place instances themselves.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "Place",
+            "PlaceCV"
+        ]
+    },
+    {
+        "name": "ProvenanceActivity",
+        "label": "Provenance Activity",
+        "description": "A class of activities that generate provenance-bearing entities, use EntityWithProvenance inputs, and are performed by agents; ResearchProject is a subclass of ProvenanceActivity.",
+        "parent": [],
+        "children": [
+            "ResearchProject"
+        ],
+        "neighbours": [
+            "Agent",
+            "EntityWithProvenance"
+        ]
+    },
+    {
+        "name": "RaceRecord",
+        "label": "Race Record",
+        "description": "A record of a person's race or color, as written in a historical source. A subclass of AgentRecord for person-only race assertions, recording the race description as source-based text rather than as a typed controlled-vocabulary value.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "ResearchProject",
+        "label": "Research Project",
+        "description": "A subclass of both Event and ProvenanceActivity representing a data-contributing research project, which inherits event structure while also functioning as a provenance-generating activity.",
+        "parent": [
+            "Event",
+            "ProvenanceActivity"
+        ],
+        "children": [],
+        "neighbours": [
+            "ResearchProjectContributorRole",
+            "ResearchProjectPIRole",
+            "AgentRecord",
+            "Description",
+            "EntityWithProvenance",
+            "EventTypes",
+            "ExternalReference",
+            "ParticipantRoleRecord",
+            "PersonStatusRecord",
+            "Place",
+            "TemporalExtent",
+            "Agent"
+        ]
+    },
+    {
+        "name": "ResearchProjectContributorRole",
+        "label": "Research Project Contributor Role",
+        "description": "A subclass of Researcher representing a contributor role that can be provided only by a ResearchProject.",
+        "parent": [
+            "Researcher"
+        ],
+        "children": [],
+        "neighbours": [
+            "ResearchProject"
+        ]
+    },
+    {
+        "name": "ResearchProjectPIRole",
+        "label": "Research Project PI Role",
+        "description": "A subclass of Researcher representing a principal-investigator role that can be provided only by a ResearchProject.",
+        "parent": [
+            "Researcher"
+        ],
+        "children": [],
+        "neighbours": [
+            "ResearchProject"
+        ]
+    },
+    {
+        "name": "Researcher",
+        "label": "Researcher",
+        "description": "A class used for agents who occupy research-project participation roles in the ontology; its direct subclasses are ResearchProjectPIRole and ResearchProjectContributorRole.",
+        "parent": [],
+        "children": [
+            "ResearchProjectContributorRole",
+            "ResearchProjectPIRole"
+        ],
+        "neighbours": []
+    },
+    {
+        "name": "SexRecord",
+        "label": "Sex Record",
+        "description": "A record of a person's gender or sex, male or female, used in demographic breakdowns. A subclass of AgentRecord for person-only sex assertions, recording exactly one SexTypes value for the person-specific claim.",
+        "parent": [
+            "AgentRecord"
+        ],
+        "children": [],
+        "neighbours": [
+            "SexTypes",
+            "EntityWithProvenance",
+            "Event",
+            "TemporalExtent"
+        ]
+    },
+    {
+        "name": "SexTypes",
+        "label": "Sex Types",
+        "description": "The gender or sex values, such as male and female. A controlled-vocabulary class of sex values used by SexRecord, distinct from the record that asserts such a value for a person.",
+        "parent": [],
+        "children": [],
+        "neighbours": [
+            "SexRecord"
+        ]
+    },
+    {
+        "name": "SpatialExtent",
+        "label": "Spatial Extent",
+        "description": "A superclass for spatial-extent representations associated with places; Coordinates is its direct subclass in the current ontology.",
+        "parent": [],
+        "children": [
+            "Coordinates"
+        ],
+        "neighbours": [
+            "Place"
+        ]
+    },
+    {
+        "name": "TemporalExtent",
+        "label": "Temporal Extent",
+        "description": "When something happened: a date, year, time period, era, or century, with start and end dates. A class for temporally scoping records, events, and places by dates or date-bounded relations such as startsAt, endsAt, occursBefore, occursAfter, contains, or fallsWithin; TimeSpan is its subclass for explicit start/end intervals.",
+        "parent": [],
+        "children": [
+            "TimeSpan"
+        ],
+        "neighbours": [
+            "AgentRecord",
+            "Event",
+            "Place",
+            "TimeSpan"
+        ]
+    },
+    {
+        "name": "TimeSpan",
+        "label": "Time Span",
+        "description": "A time period with a start and an end date, such as a year, an era, or a century. A subclass of TemporalExtent representing an interval explicitly bounded by a start date and an end date.",
+        "parent": [
+            "TemporalExtent"
+        ],
+        "children": [],
+        "neighbours": [
+            "TemporalExtent"
+        ]
+    }
+]
+
+
+
