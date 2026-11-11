@@ -31,3 +31,8 @@ def read_csv(path):
 def run_name(model_key, no_instruction):
     """Name a run after its model, with a __noinstr suffix for the no-instruction ablation."""
     return f"{model_key}__noinstr" if no_instruction else model_key
+
+
+def rerank_run_name(run):
+    """Name the reranked version of a run, so it is scored as its own row next to the plain run."""
+    return f"{run}+rerank"

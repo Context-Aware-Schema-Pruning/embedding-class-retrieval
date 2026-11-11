@@ -54,6 +54,20 @@ def save_run_embeddings(run_dir, cq_vectors, class_vectors, meta):
         json.dump(meta, handle, indent=2, ensure_ascii=False)
 
 
+def report_device():
+    """Print the GPU the next model will load on, or warn that it will run on the CPU."""
+    import torch
+
+    # sentence-transformers and our reranker loader fall back to the CPU silently, so say it out loud.
+    if not torch.cuda.is_available():
+        print(f"   WARNING: no CUDA GPU visible to torch {torch.__version__}; running on CPU, which is much slower")
+        return
+    gpu = torch.cuda.get_device_properties(0)
+    free, total = torch.cuda.mem_get_info(0)
+    print(f"   GPU: {gpu.name}, {free / 2**30:.1f} of {total / 2**30:.1f} GiB free, "
+          f"compute capability {gpu.major}.{gpu.minor}, torch {torch.__version__}")
+
+
 def free_gpu():
     """Release memory left by a model the caller has already deleted, so the next model fits on the GPU."""
     import torch
@@ -79,6 +93,7 @@ def run_embed(args):
 
         model = None
         try:
+            report_device()
             model = load_model(spec)
             cq_vectors = embed_texts(model, questions, query_prompt)
             class_vectors = {view: embed_texts(model, [row[view] for row in class_rows], spec["doc_prompt"])
