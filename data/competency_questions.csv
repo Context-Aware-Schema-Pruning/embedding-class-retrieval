@@ -1,5 +1,5 @@
 cq_id,question,gold_classes
-CQ1,"What are all the enslaved individuals categorized by gender, ethnicity, and location (e.g., on plantation X or of XXXX ethnicity)?",Agent|Person|PersonRecord|NameRecord|PersonStatusRecord|PSCategories|SexRecord|SexTypes|OriginRecord|ECVO|Event|Place
+CQ1,"What are all the enslaved individuals categorized by gender, ethnicity, and location (e.g., on plantation X or of XXXX ethnicity)?",Agent|Person|PersonRecord|NameRecord|AgentRecord|PersonStatusRecord|PSCategories|SexRecord|SexTypes|OriginRecord|ECVO|Event|Place
 CQ2,"What are all the enslaved people in County X (suppose ""Mexico"") in the century X (16th - 1700 to 1800)?",Agent|AgentRecord|Person|PersonRecord|NameRecord|PersonStatusRecord|PSCategories|ParticipantRoleRecord|Event|Place|PlaceTypeCV|TemporalExtent
 CQ3,What are all the available population counts of enslaved people by place and year?,"Agent|AgentRecord|Person|PersonRecord|PersonStatusRecord|PSCategories|Event|Place|TemporalExtent"
 CQ5,What are all the geographical places associated with enslaved people and their relationships to those places?,Agent|AgentRecord|Person|PersonRecord|PersonStatusRecord|PSCategories|OriginRecord|ParticipantRoleRecord|ParticipantRoleTypes|Event|Place
