@@ -19,21 +19,18 @@ RERANK_TASK = ("Given a competency question, judge whether the ontology class de
                "provides information needed to answer at least part of the question")
 
 # query_prompt / doc_prompt follow each model card; the instruction only goes on the question side.
-# Each reranker comes from the same family as its embedding model; "kind" picks how rerank/ scores a pair.
 MODELS = {
     "qwen3-8b": {
         "id": "Qwen/Qwen3-Embedding-8B",
         "query_prompt": f"Instruct: {TASK}\nQuery: ",
         "doc_prompt": "",
         "dtype": "bfloat16",
-        "reranker": {"id": "Qwen/Qwen3-Reranker-8B", "kind": "qwen3", "dtype": "bfloat16"},
     },
     "qwen3-4b": {
         "id": "Qwen/Qwen3-Embedding-4B",
         "query_prompt": f"Instruct: {TASK}\nQuery: ",
         "doc_prompt": "",
         "dtype": "bfloat16",
-        "reranker": {"id": "Qwen/Qwen3-Reranker-4B", "kind": "qwen3", "dtype": "bfloat16"},
     },
     "embeddinggemma": {
         "id": "google/embeddinggemma-300m",
@@ -41,14 +38,19 @@ MODELS = {
         "doc_prompt": "title: none | text: ",
         # EmbeddingGemma's activations overflow in float16 and it is small, so keep float32.
         "dtype": "float32",
-        # Google publishes no EmbeddingGemma reranker; BAAI's Gemma-based one is the closest family match.
-        "reranker": {"id": "BAAI/bge-reranker-v2-gemma", "kind": "bge-gemma", "dtype": "float16"},
     },
     "bge-m3": {
         "id": "BAAI/bge-m3",
         "query_prompt": "",
         "doc_prompt": "",
         "dtype": "float16",
-        "reranker": {"id": "BAAI/bge-reranker-v2-m3", "kind": "cross-encoder", "dtype": "float16"},
     },
 }
+
+# One reranker reorders every retriever's shortlist, so a change after reranking comes from the retriever alone.
+# The 8B entry is for a later size comparison; "kind" picks how rerank/ scores a pair.
+RERANKERS = {
+    "qwen3-reranker-4b": {"id": "Qwen/Qwen3-Reranker-4B", "kind": "qwen3", "dtype": "bfloat16"},
+    "qwen3-reranker-8b": {"id": "Qwen/Qwen3-Reranker-8B", "kind": "qwen3", "dtype": "bfloat16"},
+}
+DEFAULT_RERANKER = "qwen3-reranker-4b"

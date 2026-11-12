@@ -5,8 +5,8 @@ import os
 import random
 import tempfile
 
-from common.config import VIEWS
-from common.files import read_csv, run_name, write_csv
+from common.config import RERANKERS, VIEWS
+from common.files import read_csv, rerank_run_name, run_name, write_csv
 from rank import write_rankings
 
 RECALL_KS = [5, 10, 20]
@@ -53,6 +53,11 @@ def summarise(rankings_dir, runs, gold_by_cq, n_classes):
             if not os.path.isfile(path):
                 missing.append(f"{run}__{view}")
                 continue
+            # A reranked file older than the ranking it came from was built from outdated rankings or gold labels.
+            source = os.path.join(rankings_dir, f"{run.split('+')[0]}__{view}.csv")
+            if source != path and os.path.isfile(source) and os.path.getmtime(path) < os.path.getmtime(source):
+                missing.append(f"{run}__{view} (older than its ranking; re-run rerank)")
+                continue
             ranked_by_cq = {}
             # csv values are strings, so sort ranks as ints or "10" would come before "2".
             for row in sorted(read_csv(path), key=lambda row: int(row["rank"])):
@@ -93,6 +98,7 @@ def print_summary(summary_rows, n_cqs):
     print(f"\nNotes: averaged over {n_cqs} CQs, so differences below about 0.05 are noise.")
     print("       Class descriptions were written using the CQ wording, so these scores are optimistic.")
     print("       R-Prec cuts at each CQ's own gold size; random = expected score of a random ranking.")
+
 
 
 def self_test():
@@ -160,6 +166,10 @@ def run_evaluate(args):
         ablation = run_name(model_key, True)
         if not args.no_instruction and os.path.isfile(os.path.join(rankings_dir, f"{ablation}__{VIEWS[0]}.csv")):
             runs.append(ablation)
+    # Same for reranked runs: score every reranker's output that exists, next to the ranking it reordered.
+    runs += [rerank_run_name(run, key) for run in list(runs) for key in RERANKERS
+             if any(os.path.isfile(os.path.join(rankings_dir, f"{rerank_run_name(run, key)}__{view}.csv"))
+                    for view in VIEWS)]
 
     try:
         summary_rows, per_cq_rows, missing = summarise(rankings_dir, runs, gold_by_cq, n_classes)
@@ -170,11 +180,18 @@ def run_evaluate(args):
         print(f"no rankings found in {rankings_dir} for: {', '.join(runs)}; run rank first")
         return 1
 
-    results_dir = os.path.join(args.out_dir, "results")
-    write_csv(os.path.join(results_dir, "summary.csv"), summary_rows, ["run", "view"] + METRICS)
-    write_csv(os.path.join(results_dir, "per_cq.csv"), per_cq_rows, ["run", "view", "cq_id"] + METRICS + ["missed_top10"])
     print_summary(summary_rows, len(gold_by_cq))
-    print(f"\nwrote {os.path.join(results_dir, 'summary.csv')}\n      {os.path.join(results_dir, 'per_cq.csv')}")
+    print()
+    # Reranked runs are named {run}+{reranker}; the random baseline goes in both summaries as the common reference.
+    for folder, is_reranked in (("ranked", False), ("reranked", True)):
+        summary = [row for row in summary_rows if ("+" in row["run"]) == is_reranked or row["run"] == "random"]
+        per_cq = [row for row in per_cq_rows if ("+" in row["run"]) == is_reranked]
+        if not per_cq:
+            continue
+        folder_dir = os.path.join(args.out_dir, "results", folder)
+        write_csv(os.path.join(folder_dir, "summary.csv"), summary, ["run", "view"] + METRICS)
+        write_csv(os.path.join(folder_dir, "per_cq.csv"), per_cq, ["run", "view", "cq_id"] + METRICS + ["missed_top10"])
+        print(f"wrote {os.path.join(folder_dir, 'summary.csv')}\n      {os.path.join(folder_dir, 'per_cq.csv')}")
 
     if missing:
         print(f"missing rankings (not evaluated): {', '.join(missing)}")

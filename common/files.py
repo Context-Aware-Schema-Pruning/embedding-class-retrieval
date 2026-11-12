@@ -33,6 +33,6 @@ def run_name(model_key, no_instruction):
     return f"{model_key}__noinstr" if no_instruction else model_key
 
 
-def rerank_run_name(run):
-    """Name the reranked version of a run, so it is scored as its own row next to the plain run."""
-    return f"{run}+rerank"
+def rerank_run_name(run, reranker_key):
+    """Name a run reranked by one reranker, so it is scored as its own row and each reranker gets its own files."""
+    return f"{run}+{reranker_key}"
