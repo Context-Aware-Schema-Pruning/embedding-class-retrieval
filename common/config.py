@@ -47,10 +47,10 @@ MODELS = {
     },
 }
 
-# One reranker reorders every retriever's shortlist, so a change after reranking comes from the retriever alone.
-# The 8B entry is for a later size comparison; "kind" picks how rerank/ scores a pair.
+# Each reranker reorders every retriever's shortlist, so within one reranker a change comes from the retriever alone;
+# 4B vs 8B is the size comparison. Listed smallest first so a failing 8B load can't block the 4B results.
+# "kind" picks how rerank/ scores a pair.
 RERANKERS = {
     "qwen3-reranker-4b": {"id": "Qwen/Qwen3-Reranker-4B", "kind": "qwen3", "dtype": "bfloat16"},
     "qwen3-reranker-8b": {"id": "Qwen/Qwen3-Reranker-8B", "kind": "qwen3", "dtype": "bfloat16"},
 }
-DEFAULT_RERANKER = "qwen3-reranker-4b"

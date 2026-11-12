@@ -182,12 +182,14 @@ def run_evaluate(args):
 
     print_summary(summary_rows, len(gold_by_cq))
     print()
-    # Reranked runs are named {run}+{reranker}; the random baseline goes in both summaries as the common reference.
-    for folder, is_reranked in (("ranked", False), ("reranked", True)):
-        summary = [row for row in summary_rows if ("+" in row["run"]) == is_reranked or row["run"] == "random"]
-        per_cq = [row for row in per_cq_rows if ("+" in row["run"]) == is_reranked]
-        if not per_cq:
-            continue
+    # Reranked runs are named {run}+{reranker}: each reranker gets its own folder, so 4B and 8B results never mix.
+    def folder_of(run):
+        return "ranked" if "+" not in run else os.path.join("reranked", run.split("+")[1])
+
+    # The random baseline goes in every summary as the common reference.
+    for folder in sorted({folder_of(row["run"]) for row in per_cq_rows}):
+        summary = [row for row in summary_rows if row["run"] == "random" or folder_of(row["run"]) == folder]
+        per_cq = [row for row in per_cq_rows if folder_of(row["run"]) == folder]
         folder_dir = os.path.join(args.out_dir, "results", folder)
         write_csv(os.path.join(folder_dir, "summary.csv"), summary, ["run", "view"] + METRICS)
         write_csv(os.path.join(folder_dir, "per_cq.csv"), per_cq, ["run", "view", "cq_id"] + METRICS + ["missed_top10"])

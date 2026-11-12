@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-from common.config import MODELS, DATA, DEFAULT_RERANKER, OUT_CQ_CLASS_RETRIEVAL, RERANK_TOP_K, RERANKERS
+from common.config import MODELS, DATA, OUT_CQ_CLASS_RETRIEVAL, RERANK_TOP_K, RERANKERS
 from embed import run_embed
 from evaluate import run_evaluate
 from prepare import run_prepare
@@ -29,8 +29,8 @@ def build_parser():
                         help="empty query prompt (ablation); outputs get a __noinstr suffix")
     parser.add_argument("--top-k", type=int, default=RERANK_TOP_K,
                         help="rerank: how many top retrieved classes per CQ the reranker reorders")
-    parser.add_argument("--reranker", default=DEFAULT_RERANKER, choices=list(RERANKERS),
-                        help="rerank: which reranker reorders every chosen run; outputs are named {run}+{reranker}")
+    parser.add_argument("--rerankers", nargs="+", default=list(RERANKERS), choices=list(RERANKERS),
+                        help="rerank: rerankers that each reorder every chosen run (default: all); outputs are named {run}+{reranker}")
     parser.add_argument("--self-test", action="store_true",
                         help="evaluate: check the metric code on oracle/reversed rankings, no embeddings needed")
     return parser

@@ -29,7 +29,7 @@ def load_ranking(path):
 
 
 def load_reranker(spec):
-    """Load one RERANKERS entry in its listed dtype as (tokenizer, model), on the GPU if one is available."""
+    """Load one RERANKERS entry in its listed dtype as (tokenizer, model), on the GPU(s) with CPU overflow if needed."""
     # score_pairs only knows the Qwen3 prompt and yes/no scoring; fail before a long download, not after.
     if spec["kind"] != "qwen3":
         raise ValueError(f"unsupported reranker kind {spec['kind']!r} for {spec['id']}; only 'qwen3' is implemented")
@@ -40,8 +40,10 @@ def load_reranker(spec):
 
     # Left padding puts every pair's last real token at position -1, where score_pairs reads the yes/no logits.
     tokenizer = AutoTokenizer.from_pretrained(spec["id"], padding_side="left")
-    model = AutoModelForCausalLM.from_pretrained(spec["id"], torch_dtype=getattr(torch, spec["dtype"]))
-    model.to("cuda" if torch.cuda.is_available() else "cpu").eval()
+    # device_map="auto" fills the GPU(s) first and puts layers that don't fit on the CPU: Qwen3-Reranker-8B's
+    # 15.3 GiB of bf16 weights don't fit a 16 GB V100 on their own. Smaller models still land on one GPU.
+    model = AutoModelForCausalLM.from_pretrained(spec["id"], dtype=getattr(torch, spec["dtype"]), device_map="auto")
+    model.eval()
     return tokenizer, model
 
 
@@ -91,7 +93,7 @@ def merge_rankings(ranking, rerank_scores, top_k, gold_by_cq):
 
 
 def run_rerank(args):
-    """Rerank every chosen run's top-k classes per CQ and view with one reranker; missing or stale rankings are skipped."""
+    """Rerank every chosen run's top-k classes per CQ and view with each chosen reranker; missing or stale rankings are skipped."""
     class_rows = read_csv(os.path.join(args.out_dir, "classes.csv"))
     cq_rows = read_csv(os.path.join(args.out_dir, "cqs.csv"))
     class_texts = {view: {row["name"]: row[view] for row in class_rows} for view in VIEWS}
@@ -99,11 +101,9 @@ def run_rerank(args):
     gold_by_cq = {row["cq_id"]: set(row["gold_classes"].split("|")) for row in cq_rows}
     class_names = set(class_texts[VIEWS[0]])
     rankings_dir = os.path.join(args.out_dir, "rankings")
-    spec = RERANKERS[args.reranker]
-    print(f"== rerank with {args.reranker} ({spec['id']}, {spec['dtype']}), top {args.top_k}")
 
-    # Check every ranking before loading the reranker, so it is never loaded for nothing.
-    rankings, skipped = {}, []
+    # Check every ranking before loading a reranker, so none is loaded for nothing.
+    rankings, skipped, failed = {}, [], []
     for model_key in args.models:
         run = run_name(model_key, args.no_instruction)
         for view in VIEWS:
@@ -124,38 +124,43 @@ def run_rerank(args):
         print("nothing to rerank")
         return 1
 
-    # A score depends only on (CQ, class text), so a class several runs shortlist in the same view is scored once.
-    cache = {}
-    written = []
-    reranker = None
-    try:
-        report_device()
-        reranker = load_reranker(spec)
-        for (run, view), ranking in rankings.items():
-            rerank_scores = {}
-            for cq_id, classes in ranking.items():
-                names = [name for name, _ in classes[:args.top_k]]
-                new = [name for name in names if (view, cq_id, name) not in cache]
-                if new:
-                    scores = score_pairs(reranker, questions[cq_id], [class_texts[view][name] for name in new])
-                    for name, score in zip(new, scores, strict=True):
-                        cache[(view, cq_id, name)] = score
-                rerank_scores[cq_id] = [cache[(view, cq_id, name)] for name in names]
-            rows = merge_rankings(ranking, rerank_scores, args.top_k, gold_by_cq)
-            out_name = f"{rerank_run_name(run, args.reranker)}__{view}"
-            write_rankings(os.path.join(rankings_dir, f"{out_name}.csv"), rows)
-            print(f"   {out_name}: written ({len(cache)} pairs scored so far)")
-            written.append(out_name)
-    # A reranker that won't load or score (VRAM, gated licence, old transformers) is reported, not raised.
-    except Exception as error:
-        print(f"   FAILED: {type(error).__name__}: {error}")
-        skipped.append(args.reranker)
-    finally:
-        del reranker
-        free_gpu()
+    for reranker_key in args.rerankers:
+        spec = RERANKERS[reranker_key]
+        print(f"\n== rerank with {reranker_key} ({spec['id']}, {spec['dtype']}), top {args.top_k}")
+        # A score depends only on (CQ, class text), so a class several runs shortlist in the same view is scored once.
+        cache = {}
+        written = 0
+        reranker = None
+        try:
+            report_device()
+            reranker = load_reranker(spec)
+            for (run, view), ranking in rankings.items():
+                rerank_scores = {}
+                for cq_id, classes in ranking.items():
+                    names = [name for name, _ in classes[:args.top_k]]
+                    new = [name for name in names if (view, cq_id, name) not in cache]
+                    if new:
+                        scores = score_pairs(reranker, questions[cq_id], [class_texts[view][name] for name in new])
+                        for name, score in zip(new, scores, strict=True):
+                            cache[(view, cq_id, name)] = score
+                    rerank_scores[cq_id] = [cache[(view, cq_id, name)] for name in names]
+                rows = merge_rankings(ranking, rerank_scores, args.top_k, gold_by_cq)
+                out_name = f"{rerank_run_name(run, reranker_key)}__{view}"
+                write_rankings(os.path.join(rankings_dir, f"{out_name}.csv"), rows)
+                print(f"   {out_name}: written ({len(cache)} pairs scored so far)")
+                written += 1
+        # A reranker that won't load or score (VRAM, gated licence, old transformers) shouldn't stop the next one.
+        except Exception as error:
+            print(f"   FAILED: {type(error).__name__}: {error}")
+            failed.append(reranker_key)
+        finally:
+            del reranker
+            free_gpu()
+        print(f"   {reranker_key}: {written} run x view files, {len(cache)} pairs scored")
 
-    print(f"\nreranked: {len(written)} run x view files, {len(cache)} pairs scored -> {rankings_dir}")
+    print(f"\nreranked -> {rankings_dir}")
+    if failed:
+        print(f"failed:   {', '.join(failed)}")
     if skipped:
         print(f"skipped:  {', '.join(skipped)}")
-        return 1
-    return 0
+    return 1 if failed or skipped else 0
