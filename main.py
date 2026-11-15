@@ -1,6 +1,7 @@
 """Rank the Enslaved Ontology classes for each competency question by embedding similarity.
 
-- Entry point: `python main.py <stage>`; stages: prepare -> embed -> rank -> rerank -> evaluate (or `all`).
+- Entry point: `python main.py <stage>`; stages: prepare -> embed -> rank -> rerank -> evaluate (or `all`);
+  `export --file <rankings csv>` writes one ranking as JSON.
 - Each stage lives in its own folder; shared constants and csv helpers are in common/.
 - Only `embed` and `rerank` need a GPU / torch; the other stages run CPU-only.
 """
@@ -12,6 +13,7 @@ import sys
 from common.config import MODELS, DATA, OUT_CQ_CLASS_RETRIEVAL, RERANK_TOP_K, RERANKERS
 from embed import run_embed
 from evaluate import run_evaluate
+from export import run_export
 from prepare import run_prepare
 from rank import run_rank
 from rerank import run_rerank
@@ -20,7 +22,7 @@ from rerank import run_rerank
 def build_parser():
     """Build the CLI: a stage name plus the few options every stage shares."""
     parser = argparse.ArgumentParser(description="CQ -> ontology class retrieval with embedding models.")
-    parser.add_argument("command", choices=["prepare", "embed", "rank", "rerank", "evaluate", "all"])
+    parser.add_argument("command", choices=["prepare", "embed", "rank", "rerank", "evaluate", "all", "export"])
     parser.add_argument("--classes-path", default=os.path.join(DATA, "class_descriptions.json"))
     parser.add_argument("--cqs-path", default=os.path.join(DATA, "competency_questions.csv"))
     parser.add_argument("--out-dir", default=OUT_CQ_CLASS_RETRIEVAL)
@@ -33,6 +35,9 @@ def build_parser():
                         help="rerank: rerankers that each reorder every chosen run (default: all); outputs are named {run}+{reranker}")
     parser.add_argument("--self-test", action="store_true",
                         help="evaluate: check the metric code on oracle/reversed rankings, no embeddings needed")
+    parser.add_argument("--file", help="export: the rankings csv to write as JSON")
+    parser.add_argument("--top-classes", type=int, default=10,
+                        help="export: how many top classes per CQ go into the JSON")
     return parser
 
 
@@ -55,6 +60,7 @@ def main():
         "rerank": run_rerank,
         "evaluate": run_evaluate,
         "all": run_all,
+        "export": run_export,
     }
     sys.exit(stages[args.command](args))
 
