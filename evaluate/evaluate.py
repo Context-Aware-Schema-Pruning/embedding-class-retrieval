@@ -9,7 +9,7 @@ from common.config import RERANKERS, VIEWS
 from common.files import read_csv, rerank_run_name, run_name, write_csv
 from rank import write_rankings
 
-RECALL_KS = [5, 10, 20]
+RECALL_KS = [5, 10, 15, 20]
 PRECISION_KS = [5, 10]
 METRICS = [f"recall@{k}" for k in RECALL_KS] + [f"precision@{k}" for k in PRECISION_KS] + ["r_precision", "mrr"]
 
@@ -27,7 +27,7 @@ def metrics_for_cq(ranked_classes, gold):
     first_hit = next((rank for rank, hit in enumerate(hits, start=1) if hit), None)
     metrics["mrr"] = 1 / first_hit if first_hit else 0.0
     # Listed in rank order (nearest miss first) because gold is a set and has no stable order of its own.
-    metrics["missed_top10"] = [name for name in ranked_classes[10:] if name in gold]
+    metrics["missed_top15"] = [name for name in ranked_classes[15:] if name in gold]
     return metrics
 
 
@@ -71,7 +71,7 @@ def summarise(rankings_dir, runs, gold_by_cq, n_classes):
                 cq_metrics.append(metrics)
                 per_cq_rows.append({"run": run, "view": view, "cq_id": cq_id,
                                     **{name: round(metrics[name], 4) for name in METRICS},
-                                    "missed_top10": "|".join(metrics["missed_top10"])})
+                                    "missed_top15": "|".join(metrics["missed_top15"])})
             summary_rows.append({"run": run, "view": view,
                                  **{name: round(sum(m[name] for m in cq_metrics) / len(cq_metrics), 4)
                                     for name in METRICS}})
@@ -83,7 +83,7 @@ def summarise(rankings_dir, runs, gold_by_cq, n_classes):
 
 def print_summary(summary_rows, n_cqs):
     """Print the run x view table sorted by Recall@10 (random baseline last), with the caveats for reading it."""
-    headers = {"recall@5": "R@5", "recall@10": "R@10", "recall@20": "R@20", "precision@5": "P@5",
+    headers = {"recall@5": "R@5", "recall@10": "R@10", "recall@15": "R@15", "recall@20": "R@20", "precision@5": "P@5",
                "precision@10": "P@10", "r_precision": "R-Prec", "mrr": "MRR"}
     runs = sorted((row for row in summary_rows if row["run"] != "random"), key=lambda row: -row["recall@10"])
     baseline = [row for row in summary_rows if row["run"] == "random"]
@@ -192,7 +192,7 @@ def run_evaluate(args):
         per_cq = [row for row in per_cq_rows if folder_of(row["run"]) == folder]
         folder_dir = os.path.join(args.out_dir, "results", folder)
         write_csv(os.path.join(folder_dir, "summary.csv"), summary, ["run", "view"] + METRICS)
-        write_csv(os.path.join(folder_dir, "per_cq.csv"), per_cq, ["run", "view", "cq_id"] + METRICS + ["missed_top10"])
+        write_csv(os.path.join(folder_dir, "per_cq.csv"), per_cq, ["run", "view", "cq_id"] + METRICS + ["missed_top15"])
         print(f"wrote {os.path.join(folder_dir, 'summary.csv')}\n      {os.path.join(folder_dir, 'per_cq.csv')}")
 
     if missing:
